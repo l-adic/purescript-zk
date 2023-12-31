@@ -1,0 +1,14 @@
+{
+    "name": "purs-zk",
+    "version": "0.0.1",
+    "artifacts-dir": "build/contracts",
+    "source-dir": "contracts",
+    "modules": [ "Groth16Verifier"
+               ],
+    "solc-evm-version": "istanbul",
+    "solc-output-selection": [],
+    "purescript-generator": {
+        "output-path": "./src",
+        "module-prefix": "Contracts"
+    }
+}
