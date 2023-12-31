@@ -5,7 +5,7 @@
     "postinstall": "spago -x bootstrap.dhall build --deps-only",
     "chanterelle-build": "spago -x bootstrap.dhall run -m ChanterelleMain --node-args=\"build\"",
     "build": "spago build",
-    "test": "spago run",
+    "deploy": "spago run -m Deploy.Main",
     "tidy": "purs-tidy format-in-place \"src/**/*.purs\" \"test/**/*.purs\"",
     "tidy-check": "purs-tidy check \"src/**/*.purs\" \"test/**/*.purs\""
   },
