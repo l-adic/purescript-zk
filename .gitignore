@@ -4,3 +4,6 @@ package-lock.json
 output
 build
 src/Contracts
+.psc-ide-port
+.vscode/
+
