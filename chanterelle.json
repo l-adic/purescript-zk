@@ -4,7 +4,8 @@
     "artifacts-dir": "build/contracts",
     "source-dir": "contracts",
     "modules": [
-        "TestVerifier"
+        "TestVerifier",
+        "Verifier"
     ],
     "solc-evm-version": "berlin",
     "solc-output-selection": [],

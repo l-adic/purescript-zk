@@ -1,6 +1,7 @@
 module Proof
   ( G1(..)
   , G2(..)
+  , Fp2(..)
   , Proof(..)
   , Inputs(..)
   , VerifyingKey(..)
@@ -17,7 +18,7 @@ import Control.Monad.Error.Class (throwError)
 import Data.Argonaut (JsonDecodeError(..), jsonEmptyObject, parseJson, printJsonDecodeError, (~>))
 import Data.Argonaut as A
 import Data.Argonaut.Decode (fromJsonString)
-import Data.Array (sortWith, (!!))
+import Data.Array (sortWith)
 import Data.Either (Either, either)
 import Data.Maybe (fromJust, maybe)
 import Data.Reflectable (class Reflectable)
@@ -52,7 +53,41 @@ instance A.EncodeJson G1 where
       ~> "y" A.:= encodeUInt y
       ~> jsonEmptyObject
 
-newtype G2 = G2 { x :: Vector 2 (UIntN 256), y :: Vector 2 (UIntN 256) }
+newtype Fp2 = Fp2 { real :: UIntN 256, imag :: UIntN 256 }
+
+derive newtype instance Show Fp2
+derive newtype instance Eq Fp2
+
+instance A.DecodeJson Fp2 where
+  decodeJson json = do
+    Tuple _real _imag <- A.decodeJson json
+    real <- decodeUInt _real
+    imag <- decodeUInt _imag
+    pure $ Fp2 { real, imag }
+
+instance A.EncodeJson Fp2 where
+  encodeJson (Fp2 { real, imag }) = A.encodeJson $
+    Tuple (encodeUInt real) (encodeUInt imag)
+
+{-
+NOTE:
+
+In arkworks, all elements of F_{p^2} are represented as [a,b] == a + b * u where u^2 = -1
+Thus G2 == [[x_real,x_imag], [y_real, y_imag]]
+
+This is also the convention of circom:
+https://github.com/yi-sun/circom-pairing/blob/master/docs/README.md#fp2-element
+
+However, in ethereum the convention is the opposite (of course):
+https://github.com/ethereum/EIPs/blob/master/EIPS/eip-197.md#encoding
+
+
+Thus we assume that the json representation of G2 is:
+{ "x": [x_real, x_imag], "y": [y_real, y_imag] }
+
+-}
+
+newtype G2 = G2 { x :: Fp2, y :: Fp2 }
 
 derive newtype instance Show G2
 derive newtype instance Eq G2
@@ -60,27 +95,18 @@ derive newtype instance Eq G2
 instance A.DecodeJson G2 where
   decodeJson json = do
     obj <- A.decodeJson json
-    x <- do
-      Tuple a b <- obj A..: "x"
-      _a <- decodeUInt a
-      _b <- decodeUInt b
-      pure $ vCons _b $ vCons _a nilVector
-    y <- do
-      Tuple a b <- obj A..: "y"
-      _a <- decodeUInt a
-      _b <- decodeUInt b
-      pure $ vCons _b $ vCons _a nilVector
+    x <- obj A..: "x"
+    y <- obj A..: "y"
     pure $ G2 { x, y }
 
 instance A.EncodeJson G2 where
   encodeJson (G2 { x, y }) =
-    let
-      x_list = encodeUInt <$> unVector x
-      y_list = encodeUInt <$> unVector y
-    in
-      "x" A.:= Tuple (x_list !! 1) (x_list !! 0)
-        ~> "y" A.:= Tuple (y_list !! 1) (y_list !! 0)
-        ~> jsonEmptyObject
+    "x" A.:= x
+      ~> "y" A.:= y
+      ~> jsonEmptyObject
+
+fp2ForEth :: Fp2 -> Vector 2 (UIntN 256)
+fp2ForEth (Fp2 { real, imag }) = vCons imag $ vCons real nilVector
 
 newtype Proof = Proof
   { a :: G1
@@ -114,9 +140,25 @@ proofForContract
      }
 proofForContract (Proof { a: G1 a, b: G2 b, c: G1 c }) =
   { "A": { "X": a.x, "Y": a.y }
-  , "B": { "X": b.x, "Y": b.y }
+  , "B": { "X": fp2ForEth b.x, "Y": fp2ForEth b.y }
   , "C": { "X": c.x, "Y": c.y }
   }
+
+--proofForContract
+--  :: forall n
+--   . Inputs n
+--  -> Proof
+--  -> { _pA :: Vector 2 (UIntN 256)
+--     , _pB :: Vector 2 (Vector 2 (UIntN 256))
+--     , _pC :: Vector 2 (UIntN 256)
+--     , _pubSignals :: Vector n (UIntN 256)
+--     }
+--proofForContract (Inputs inputs) (Proof { a: G1 a, b: G2 b, c: G1 c }) =
+--  { _pA: vCons a.x $ vCons a.y nilVector
+--  , _pB: vCons (fp2ForEth b.x) $ vCons (fp2ForEth b.y) nilVector
+--  , _pC: vCons c.x $ vCons c.y nilVector
+--  , _pubSignals: inputs
+--  }
 
 newtype VerifyingKey n = VerifyingKey
   { alpha1 :: G1
@@ -169,9 +211,9 @@ verifyingKeyForContract vk =
       } = vk
   in
     { alfa1: { "X": alpha1.x, "Y": alpha1.y }
-    , beta2: { "X": beta2.x, "Y": beta2.y }
-    , gamma2: { "X": gamma2.x, "Y": gamma2.y }
-    , delta2: { "X": delta2.x, "Y": delta2.y }
+    , beta2: { "X": fp2ForEth beta2.x, "Y": fp2ForEth beta2.y }
+    , gamma2: { "X": fp2ForEth gamma2.x, "Y": fp2ForEth gamma2.y }
+    , delta2: { "X": fp2ForEth delta2.x, "Y": fp2ForEth delta2.y }
     , "IC": (\(G1 { x, y }) -> { "X": x, "Y": y }) <$> unVector ic
     }
 

@@ -36,6 +36,7 @@ spec =
               # _from ?~ primaryAccount
               # _to ?~ verifier
           arg = { input: unVector inputs, proof: proofForContract proof, vk: verifyingKeyForContract vk }
+        --arg = proofForContract inputs proof
         res <- assertWeb3 provider $ Groth16.verify txOpts Latest arg
         res `shouldEqual` Right true
 
