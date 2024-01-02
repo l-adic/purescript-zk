@@ -3,17 +3,15 @@ module Test.ProofSpec (spec) where
 import Prelude
 
 import Chanterelle.Test (assertWeb3, buildTestConfig)
-import Contracts.TestVerifier as Groth16
 import Data.Array.Partial (head)
 import Data.Either (Either(..))
 import Data.Lens ((?~))
 import Deploy.Deploy (deployScript)
 import Effect.Aff (Aff)
 import Effect.Class.Console as Console
-import Network.Ethereum.Web3 (ChainCursor(..), _from, _to, defaultTransactionOptions)
-import Network.Ethereum.Web3.Solidity (unVector)
+import Network.Ethereum.Web3 (_from, _to, defaultTransactionOptions)
 import Partial.Unsafe (unsafePartial)
-import Proof (Inputs(..), VerifyingKey, proofForContract, readInputsFromFile, readProofFromFile, readVerifyingKeyFromFile, verifyingKeyForContract)
+import Proof (Inputs, VerifyingKey, readInputsFromFile, readProofFromFile, readVerifyingKeyFromFile, verifyWithTestVerifier)
 import Test.Spec (SpecT, beforeAll, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -29,15 +27,13 @@ spec =
         Console.log "Parsing verifying key file"
         vk :: VerifyingKey 2 <- readVerifyingKeyFromFile "proof-data/prog-vk-eth.json"
         Console.log "Parsing inputs file"
-        Inputs inputs :: Inputs 1 <- readInputsFromFile "proof-data/prog-inputs.jsonl"
+        inputs :: Inputs 1 <- readInputsFromFile "proof-data/prog-inputs.jsonl"
         let
           txOpts =
             defaultTransactionOptions
               # _from ?~ primaryAccount
               # _to ?~ verifier
-          arg = { input: unVector inputs, proof: proofForContract proof, vk: verifyingKeyForContract vk }
-        --arg = proofForContract inputs proof
-        res <- assertWeb3 provider $ Groth16.verify txOpts Latest arg
+        res <- assertWeb3 provider $ verifyWithTestVerifier txOpts { proof, vk, inputs }
         res `shouldEqual` Right true
 
 nodeUrl :: String
