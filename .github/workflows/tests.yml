@@ -18,7 +18,7 @@ jobs:
       uses: jaxxstorm/action-install-gh-release@v1.10.0
       with:
         repo: martyall/arkworks-bridge
-        tag: v0.2.0
+        tag: arkworks-bridge-v0.2.0_linux_x86_64.tar.gz
         platform: linux
         arch: x86-64
         cache: enable
