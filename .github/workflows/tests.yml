@@ -19,6 +19,8 @@ jobs:
       with:
         repo: martyall/arkworks-bridge
         tag: v0.2.0
+        platform: linux
+        arch: x86-64
         cache: enable
 
     - name: Run arkworks-bridge
