@@ -1,26 +1,27 @@
-module Test.ProofSpec (spec) where
+module Test.TestVerifierSpec (spec) where
 
 import Prelude
 
-import Chanterelle.Test (assertWeb3, buildTestConfig)
+import Chanterelle.Test (assertWeb3)
 import Data.Array.Partial (head)
 import Data.Either (Either(..))
 import Data.Lens ((?~))
-import Deploy.Deploy (deployScript)
 import Effect.Aff (Aff)
 import Effect.Class.Console as Console
-import Network.Ethereum.Web3 (_from, _to, defaultTransactionOptions)
+import Network.Ethereum.Web3 (Address, Provider, _from, _to, defaultTransactionOptions)
 import Partial.Unsafe (unsafePartial)
 import Proof (Inputs, VerifyingKey, readInputsFromFile, readProofFromFile, readVerifyingKeyFromFile, verifyWithTestVerifier)
-import Test.Spec (SpecT, beforeAll, describe, it)
+import Test.Spec (SpecT, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
-spec :: SpecT Aff Unit Aff Unit
-spec =
-  describe "Proof Spec"
-    $ beforeAll (buildTestConfig nodeUrl 60 $ deployScript)
+spec
+  :: forall r
+   . { provider :: Provider, accounts :: Array Address, testVerifier :: Address | r }
+  -> SpecT Aff Unit Aff Unit
+spec { testVerifier, accounts, provider } =
+  describe "TestVerifier Spec"
     $ it "Can verify a proof of a simple program"
-    $ \{ verifier, accounts, provider } -> do
+    $ do
         let primaryAccount = unsafePartial $ head accounts
         Console.log "Parsing proof file"
         proof <- readProofFromFile "proof-data/prog-proof-eth.json"
@@ -32,9 +33,6 @@ spec =
           txOpts =
             defaultTransactionOptions
               # _from ?~ primaryAccount
-              # _to ?~ verifier
+              # _to ?~ testVerifier
         res <- assertWeb3 provider $ verifyWithTestVerifier txOpts { proof, vk, inputs }
         res `shouldEqual` Right true
-
-nodeUrl :: String
-nodeUrl = "http://localhost:8545"

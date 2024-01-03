@@ -3,7 +3,14 @@ node_modules
 package-lock.json
 output
 build
-src/Contracts
 .psc-ide-port
 .vscode/
 
+# proof-data generated files
+prog-pk
+prog-proof
+prog-proof-eth.json
+prog-vk
+prog-vk-eth.json
+contracts/Verifier.sol
+src/Contracts

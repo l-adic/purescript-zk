@@ -56,8 +56,8 @@ verifyWithVerifier txOpts { proof, inputs } =
   Verifier.verifyProof txOpts Latest (proofForContract inputs proof)
   where
   proofForContract (Inputs _inputs) (Proof { a: G1 a, b: G2 b, c: G1 c }) =
-    { _pA: vCons a.x $ vCons a.y nilVector
-    , _pB: vCons (fp2ForEth b.x) $ vCons (fp2ForEth b.y) nilVector
-    , _pC: vCons c.x $ vCons c.y nilVector
-    , _pubSignals: _inputs
+    { a: vCons a.x $ vCons a.y nilVector
+    , b: vCons (fp2ForEth b.x) $ vCons (fp2ForEth b.y) nilVector
+    , c: vCons c.x $ vCons c.y nilVector
+    , input: _inputs
     }

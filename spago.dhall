@@ -14,7 +14,6 @@
   , "identity"
   , "integers"
   , "maybe"
-  , "newtype"
   , "node-buffer"
   , "node-fs-aff"
   , "node-path"
