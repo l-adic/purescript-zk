@@ -10,15 +10,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
     - name: checkout
       uses: actions/checkout@v4
+
+    - name: Install arkworks-bridge
+      uses: jaxxstorm/action-install-gh-release@v1.10.0
       with:
-        submodules: recursive
+        repo: martyall/arkworks-bridge
+        tag: v0.2.0
+        cache: enable
+
+    - name: Run arkworks-bridge
+      run: |
+        docker run -d -p 8545:8545 -e ACCOUNTS_TO_CREATE=10 foamspace/cliquebait:v1.12.0
+        arkworks-bridge create-trusted-setup --r1cs .proof-data/prog-r1cs.jsonl --proving-key ./proof-data/prog-pk --verifying-key ./proof-data/prog-vk --as-json
+        arkworks-bridge generate-contract --contract ./contracts/Verifier.sol --verifying-key ./proof-data/prog-vk --inputs ./proof-data/prog-inputs.jsonl
+        arkworks-bridge create-proof --proof ./proof-data/prog-proof --proving-key ./proof-data/prog-pk --r1cs ./proof-data/prog-r1cs.jsonl --witness ./proof-data/prog-witness.jsonl --ethereum
+
     - name: setup node
       uses: actions/setup-node@v3
       with:
         node-version-file: .nvmrc
-    - name: run tests
+
+    - name: Run tests against cliquebait
       run: |
+        docker run -d -p 8545:8545 -e ACCOUNTS_TO_CREATE=10 foamspace/cliquebait:v1.12.0
+        sleep 10
         npm install
-        npm run build
+        npm run chanterelle-build
+        npm run test
