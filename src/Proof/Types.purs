@@ -120,35 +120,34 @@ instance A.EncodeJson Proof where
       ~> "c" A.:= c
       ~> jsonEmptyObject
 
-newtype VerifyingKey n = VerifyingKey
+newtype VerifyingKey = VerifyingKey
   { alpha1 :: G1
   , beta2 :: G2
   , gamma2 :: G2
   , delta2 :: G2
-  , ic :: Vector n (G1)
+  , ic :: Array G1
   }
 
-derive newtype instance Show (VerifyingKey n)
-derive newtype instance Eq (VerifyingKey n)
+derive newtype instance Show VerifyingKey
+derive newtype instance Eq VerifyingKey
 
-instance A.EncodeJson (VerifyingKey n) where
+instance A.EncodeJson VerifyingKey where
   encodeJson (VerifyingKey { alpha1, beta2, gamma2, delta2, ic }) =
     "alpha1" A.:= alpha1
       ~> "beta2" A.:= beta2
       ~> "gamma2" A.:= gamma2
       ~> "delta2" A.:= delta2
-      ~> "ic" A.:= unVector ic
+      ~> "ic" A.:= ic
       ~> jsonEmptyObject
 
-instance Reflectable n Int => A.DecodeJson (VerifyingKey n) where
+instance A.DecodeJson VerifyingKey where
   decodeJson json = do
     obj <- A.decodeJson json
     alpha1 <- obj A..: "alpha1"
     beta2 <- obj A..: "beta2"
     gamma2 <- obj A..: "gamma2"
     delta2 <- obj A..: "delta2"
-    _ic <- obj A..: "ic"
-    ic <- maybe (throwError $ TypeMismatch "wrong length ic") pure $ toVector (Proxy @n) _ic
+    ic <- obj A..: "ic"
     pure $ VerifyingKey { alpha1, beta2, gamma2, delta2, ic }
 
 newtype Inputs n = Inputs (Vector n (UIntN 256))

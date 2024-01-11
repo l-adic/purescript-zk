@@ -14,3 +14,4 @@ prog-vk
 prog-vk-eth.json
 contracts/Verifier.sol
 src/Contracts
+.psci_modules/

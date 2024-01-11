@@ -11,10 +11,10 @@ import Network.Ethereum.Web3.Types (NoPay)
 import Proof.Types (Proof(..), VerifyingKey(..), G1(..), G2(..), fp2ForEth, Inputs(..))
 
 verifyWithTestVerifier
-  :: forall n m r
+  :: forall n r
    . TransactionOptions NoPay
   -> { proof :: Proof
-     , vk :: VerifyingKey m
+     , vk :: VerifyingKey
      , inputs :: Inputs n
      | r
      }
@@ -41,14 +41,14 @@ verifyWithTestVerifier txOpts arg@{ inputs: Inputs inputs } =
       , beta2: { "X": fp2ForEth beta2.x, "Y": fp2ForEth beta2.y }
       , gamma2: { "X": fp2ForEth gamma2.x, "Y": fp2ForEth gamma2.y }
       , delta2: { "X": fp2ForEth delta2.x, "Y": fp2ForEth delta2.y }
-      , "IC": (\(G1 { x, y }) -> { "X": x, "Y": y }) <$> unVector ic
+      , "IC": (\(G1 { x, y }) -> { "X": x, "Y": y }) <$> ic
       }
 
 verifyWithVerifier
   :: forall r
    . TransactionOptions NoPay
   -> { proof :: Proof
-     , inputs :: Inputs 1
+     , inputs :: Inputs 76
      | r
      }
   -> Web3 (Either CallError Boolean)

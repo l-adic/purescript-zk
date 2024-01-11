@@ -52,7 +52,7 @@ readInputsFromFile fp = Inputs <$> do
     bn <- maybe (throwError $ TypeMismatch "not a base 10 BigNumber") pure $ fromStringAs decimal str
     maybe (throwError $ TypeMismatch "not a uint") pure $ uIntNFromBigNumber (Proxy @256) bn
 
-readVerifyingKeyFromFile :: forall n. Reflectable n Int => FilePath -> Aff (VerifyingKey n)
+readVerifyingKeyFromFile :: FilePath -> Aff VerifyingKey
 readVerifyingKeyFromFile fp = do
   contents <- readTextFile UTF8 fp
   either (throwError <<< error <<< printJsonDecodeError) pure $ fromJsonString contents
