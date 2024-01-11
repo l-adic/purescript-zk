@@ -5,13 +5,21 @@ output
 build
 .psc-ide-port
 .vscode/
+.psci_modules/
 
 # proof-data generated files
-prog-pk
-prog-proof
-prog-proof-eth.json
-prog-vk
-prog-vk-eth.json
+proof-data/prog-pk
+proof-data/prog-proof
+proof-data/prog-proof-eth.json
+proof-data/prog-vk
+proof-data/prog-vk-eth.json
+
+proof-data/sudoku-pk
+proof-data/sudoku-proof
+proof-data/sudoku-proof-eth.json
+proof-data/sudoku-vk
+proof-data/sudoku-vk-eth.json
+
+# generated purescript code
 contracts/Verifier.sol
 src/Contracts
-.psci_modules/
