@@ -10,7 +10,7 @@ import Control.Monad.Error.Class (throwError)
 import Data.Argonaut (JsonDecodeError(..), parseJson, printJsonDecodeError)
 import Data.Argonaut as A
 import Data.Argonaut.Decode (fromJsonString)
-import Data.Array (sortWith)
+import Data.Array (filter, sortWith)
 import Data.Either (Either, either)
 import Data.Maybe (maybe)
 import Data.Reflectable (class Reflectable)
@@ -23,8 +23,8 @@ import Network.Ethereum.Web3.Solidity (UIntN, toVector, uIntNFromBigNumber)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile)
 import Node.Path (FilePath)
-import Type.Proxy (Proxy(..))
 import Proof.Types (Inputs(..), Proof, VerifyingKey)
+import Type.Proxy (Proxy(..))
 
 readProofFromFile :: FilePath -> Aff Proof
 readProofFromFile fp = do
@@ -34,7 +34,7 @@ readProofFromFile fp = do
 readInputsFromFile :: forall n. Reflectable n Int => FilePath -> Aff (Inputs n)
 readInputsFromFile fp = Inputs <$> do
   file <- readTextFile UTF8 fp
-  let lines = split (Pattern "\n") file
+  let lines = filter (not (_ == "")) $ split (Pattern "\n") file
   inputs <- either (throwError <<< error <<< printJsonDecodeError) pure $ traverse (parseJson >=> jsonParser) lines
   let
     sortedInputs :: Array (UIntN 256)
