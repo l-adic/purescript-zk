@@ -28,7 +28,7 @@ spec { verifier, accounts, provider } =
         Console.log "Parsing verifying key file"
         vk <- readVerifyingKeyFromFile "proof-data/sudoku-vk-eth.json"
         Console.log "Parsing inputs file"
-        inputs :: Inputs 76 <- readInputsFromFile "proof-data/sudoku-inputs.jsonl"
+        inputs :: Inputs 81 <- readInputsFromFile "proof-data/sudoku-inputs.jsonl"
         let
           txOpts =
             defaultTransactionOptions

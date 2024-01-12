@@ -48,7 +48,7 @@ verifyWithVerifier
   :: forall r
    . TransactionOptions NoPay
   -> { proof :: Proof
-     , inputs :: Inputs 76
+     , inputs :: Inputs 81
      | r
      }
   -> Web3 (Either CallError Boolean)
