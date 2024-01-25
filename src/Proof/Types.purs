@@ -3,6 +3,8 @@ module Proof.Types
   , G2(..)
   , Fp2(..)
   , Proof(..)
+  , InputType(..)
+  , Input(..)
   , Inputs(..)
   , VerifyingKey(..)
   , fp2ForEth
@@ -13,9 +15,10 @@ import Prelude
 import Control.Monad.Error.Class (throwError)
 import Data.Argonaut (JsonDecodeError(..), jsonEmptyObject, (~>))
 import Data.Argonaut as A
+import Data.Array (length)
 import Data.Either (Either)
 import Data.Maybe (fromJust, maybe)
-import Data.Reflectable (class Reflectable)
+import Data.Reflectable (class Reflectable, reflectType)
 import Data.Tuple (Tuple(..))
 import Network.Ethereum.Core.BigNumber (toString)
 import Network.Ethereum.Core.HexString (mkHexString)
@@ -148,10 +151,59 @@ instance Reflectable n Int => A.DecodeJson (VerifyingKey n) where
     gamma2 <- obj A..: "gamma2"
     delta2 <- obj A..: "delta2"
     _ic <- obj A..: "ic"
-    ic <- maybe (throwError $ TypeMismatch "wrong length ic") pure $ toVector (Proxy @n) _ic
+    ic <-
+      maybe (throwError $ TypeMismatch $ "wrong length ic: got " <> show (length _ic) <> " expected " <> show (reflectType (Proxy @n)))
+        pure $ toVector (Proxy @n) _ic
     pure $ VerifyingKey { alpha1, beta2, gamma2, delta2, ic }
 
-newtype Inputs n = Inputs (Vector n (UIntN 256))
+data InputType = Public | Private | Output
+
+instance Show InputType where
+  show Public = "Public"
+  show Private = "Private"
+  show Output = "Output"
+
+derive instance Eq InputType
+
+instance A.DecodeJson InputType where
+  decodeJson json = do
+    str <- A.decodeJson json
+    case str of
+      "public" -> pure Public
+      "private" -> pure Private
+      "output" -> pure Output
+      _ -> throwError $ TypeMismatch "not a valid input type"
+
+instance A.EncodeJson InputType where
+  encodeJson Public = A.encodeJson "public"
+  encodeJson Private = A.encodeJson "private"
+  encodeJson Output = A.encodeJson "output"
+
+newtype Input = Input
+  { tag :: InputType
+  , var :: Int
+  , value :: UIntN 256
+  }
+
+derive newtype instance Show Input
+derive newtype instance Eq Input
+
+instance A.EncodeJson Input where
+  encodeJson (Input { tag, var, value }) =
+    "tag" A.:= tag
+      ~> "var" A.:= var
+      ~> "value" A.:= encodeUInt (value)
+      ~> jsonEmptyObject
+
+instance A.DecodeJson Input where
+  decodeJson json = do
+    obj <- A.decodeJson json
+    tag <- obj A..: "tag"
+    var <- obj A..: "var"
+    value <- obj A..: "value" >>= decodeUInt
+    pure $ Input { tag, var, value }
+
+newtype Inputs n = Inputs (Vector n Input)
 
 derive newtype instance Show (Inputs n)
 derive newtype instance Eq (Inputs n)

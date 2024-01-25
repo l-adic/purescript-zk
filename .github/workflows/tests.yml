@@ -18,13 +18,14 @@ jobs:
       uses: jaxxstorm/action-install-gh-release@v1.10.0
       with:
         repo: torsion-labs/arkworks-bridge
-        tag: v0.2.0
+        tag: v1.0.0-rc2
+
 
     - name: Run arkworks-bridge
       run: |
-        arkworks-bridge create-trusted-setup --r1cs ./proof-data/prog-r1cs.jsonl --proving-key ./proof-data/prog-pk --verifying-key ./proof-data/prog-vk --ethereum
-        arkworks-bridge generate-contract --contract ./contracts/Verifier.sol --verifying-key ./proof-data/prog-vk --inputs ./proof-data/prog-inputs.jsonl
-        arkworks-bridge create-proof --proof ./proof-data/prog-proof --proving-key ./proof-data/prog-pk --r1cs ./proof-data/prog-r1cs.jsonl --witness ./proof-data/prog-witness.jsonl --ethereum
+        arkworks-bridge create-trusted-setup --r1cs ./proof-data/sudoku-r1cs.jsonl --proving-key ./proof-data/sudoku-pk --verifying-key ./proof-data/sudoku-vk --ethereum
+        arkworks-bridge generate-contract --contract ./contracts/Verifier.sol --verifying-key ./proof-data/sudoku-vk --inputs ./proof-data/sudoku-assignments.jsonl
+        arkworks-bridge create-proof --proof ./proof-data/sudoku-proof --proving-key ./proof-data/sudoku-pk --r1cs ./proof-data/sudoku-r1cs.jsonl --witness ./proof-data/sudoku-witness.jsonl --ethereum
 
     - name: setup node
       uses: actions/setup-node@v3

@@ -4,13 +4,14 @@ package-lock.json
 output
 build
 .psc-ide-port
+.psci_modules
 .vscode/
 
 # proof-data generated files
-prog-pk
-prog-proof
-prog-proof-eth.json
-prog-vk
-prog-vk-eth.json
+sudoku-pk
+sudoku-proof
+sudoku-proof-eth.json
+sudoku-vk
+sudoku-vk-eth.json
 contracts/Verifier.sol
 src/Contracts
