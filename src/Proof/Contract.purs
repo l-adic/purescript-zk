@@ -8,7 +8,7 @@ import Data.Either (Either)
 import Network.Ethereum.Web3 (CallError, ChainCursor(..), TransactionOptions, Web3, nilVector, vCons)
 import Network.Ethereum.Web3.Solidity (unVector)
 import Network.Ethereum.Web3.Types (NoPay)
-import Proof.Types (Proof(..), VerifyingKey(..), G1(..), G2(..), fp2ForEth, Inputs(..))
+import Proof.Types (G1(..), G2(..), Input(..), Inputs(..), Proof(..), VerifyingKey(..), fp2ForEth)
 
 verifyWithTestVerifier
   :: forall n m r
@@ -20,7 +20,11 @@ verifyWithTestVerifier
      }
   -> Web3 (Either CallError Boolean)
 verifyWithTestVerifier txOpts arg@{ inputs: Inputs inputs } =
-  TestVerifier.verify txOpts Latest { proof: proofForContract arg.proof, vk: verifyingKeyForContract arg.vk, input: unVector inputs }
+  TestVerifier.verify txOpts Latest
+    { proof: proofForContract arg.proof
+    , vk: verifyingKeyForContract arg.vk
+    , input: unVector $ map (\(Input { value }) -> value) inputs
+    }
   where
   proofForContract (Proof { a: G1 a, b: G2 b, c: G1 c }) =
     { "A": { "X": a.x, "Y": a.y }
@@ -48,7 +52,7 @@ verifyWithVerifier
   :: forall r
    . TransactionOptions NoPay
   -> { proof :: Proof
-     , inputs :: Inputs 1
+     , inputs :: Inputs 82
      | r
      }
   -> Web3 (Either CallError Boolean)
@@ -59,5 +63,5 @@ verifyWithVerifier txOpts { proof, inputs } =
     { a: vCons a.x $ vCons a.y nilVector
     , b: vCons (fp2ForEth b.x) $ vCons (fp2ForEth b.y) nilVector
     , c: vCons c.x $ vCons c.y nilVector
-    , input: _inputs
+    , input: map (\(Input { value }) -> value) _inputs
     }
