@@ -1,10 +1,10 @@
 # purescript-zk
 
-This repo contains an example of how to manage zk applications with [purescript-web3](https://github.com/f-o-a-m/purescript-web3) and [arkworks-bridge](https://github.com/torsion-labs/arkworks-bridge). The r1cs, witness, and public variable assignment artifacts correspond to the Snarkl [sudoku tutorial](https://github.com/torsion-labs/snarkl/blob/master/tutorial/sudoku/Sudoku.md).
+This repo contains an example of how to manage zk applications with [purescript-web3](https://github.com/f-o-a-m/purescript-web3) and [arkworks-bridge](https://github.com/l-adic/arkworks-bridge). The r1cs, witness, and public variable assignment artifacts correspond to the Snarkl [sudoku tutorial](https://github.com/l-adic/snarkl/blob/master/tutorial/sudoku/Sudoku.md).
 
 ### Requirements
 
-You will need an [arkworks-bridge binary](https://github.com/torsion-labs/arkworks-bridge/releases) in your path in order to generate the verifying smart contract and proof.
+You will need an [arkworks-bridge binary](https://github.com/l-adic/arkworks-bridge/releases) in your path in order to generate the verifying smart contract and proof.
 
 We use [cliquebait](https://github.com/f-o-a-m/cliquebait) to run the tests. You can use hardhat or foundry/anvil if that suits your needs.
 
